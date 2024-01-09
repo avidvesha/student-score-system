@@ -636,137 +636,153 @@ loginInfo showLoginMenu(sqlite3* db) {
                                 parameter(stmt.get(), 1, nim);
 
                                 if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+                                    string query = "SELECT score.student_number, person.name, score.score, score.grade FROM score FULL OUTER JOIN person ON score.student_number = person.number WHERE score.subject_id=? AND score.semester=? AND score.student_number=? ORDER BY score.student_number;";
+                                    statement stmt = create_statement(db, query);
+                                    parameter(stmt.get(), 1, sub_id);
+                                    parameter(stmt.get(), 2, smt);
+                                    parameter(stmt.get(), 3, nim);
+
+                                    if (sqlite3_step(stmt.get()) == SQLITE_ROW)
+                                    {
+                                        clearScreen();
+                                        cout << printUIErr("This Student Number already has a score. Please enter a different one!");
+                                        goto menuAddNimErrMsg;
+                                    }
+
                                     str_name = get_text_value(stmt.get(), 1);
-
-                                    clearScreen();
-                                    cout << endl << endl;
-                                    nimConfirmErrMsg:
-                                    cout << "+------------------------------------------------------------------------------+"<<endl;
-                                    cout << "|                                                                              |" << endl;
-                                    cout << printUI("| Semester         :   ", str_smt);
-                                    cout << printUI("| Student Number   :   ", str_nim);
-                                    cout << printUI("| Student Name     :   ", str_name);
-                                    cout << "|                                                                              |" << endl;
-                                    cout << "| Do you want to continue with this student? (Y/n)                             |" << endl;
-                                    cout << "|                                                                              |" << endl;
-                                    cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
-                                    cout << "+------------------------------------------------------+-----------+-----------+" << endl;
-                                    cout << "| Input: ";
-                                    cin >> option;
-
                                     
-                                    if(option == "y" || option == "Y" || option.length() == 0) {
-
-                                        clearScreen();
-                                        menuAddScore:
+                                    clearScreen();
                                         cout << endl << endl;
-                                        menuAddScoreErrMsg:
-                                        cout << "+------------------------------------------------------------------------------+"<<endl;
-                                        cout << "|      Please enter the Score!                                                 |" << endl;
-                                        cout << printUI("| Semester         :   ", str_smt);
-                                        cout << printUI("| Student Number   :   ", str_nim);
-                                        cout << printUI("| Student Name     :   ", str_name);
-                                        cout << "| Score            :   ";
-                                        cin >> score;
-                                        str_score = to_string(score);
-
-                                        
-                                        if (score > 100) {
-                                            clearScreen();
-                                            cout << printUIErr("Invalid input. Please enter another value!");
-                                            goto menuAddScoreErrMsg;                                        
-                                        } else if (score > 80) {
-                                            str_grade = "A";
-                                        } else if (score > 60) {
-                                            str_grade = "B";
-                                        } else if (score > 40) {
-                                            str_grade = "C";
-                                        } else if (score > 20) {
-                                            str_grade = "D";
-                                        } else if (score > 0) {
-                                            str_grade = "E";
-                                        } else if (score == 0) {
-                                            str_grade = "-";
-                                        } else {
-                                            clearScreen();
-                                            cout << printUIErr("Invalid input. Please enter another value!");
-                                            goto menuAddScoreErrMsg;
-                                        }
-
-                                        clearScreen();
-                                        scoreConfirm:
-                                        cout << endl << endl;
-                                        scoreConfirmErrMsg:
+                                        nimConfirmErrMsg:
                                         cout << "+------------------------------------------------------------------------------+"<<endl;
                                         cout << "|                                                                              |" << endl;
                                         cout << printUI("| Semester         :   ", str_smt);
                                         cout << printUI("| Student Number   :   ", str_nim);
                                         cout << printUI("| Student Name     :   ", str_name);
-                                        cout << printUI("| Score            :   ", str_score);
-                                        cout << printUI("| Grade            :   ", str_grade);
                                         cout << "|                                                                              |" << endl;
-                                        cout << "| Do you want to continue with this score and grade? (Y/n)                     |" << endl;
+                                        cout << "| Do you want to continue with this student? (Y/n)                             |" << endl;
                                         cout << "|                                                                              |" << endl;
                                         cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
                                         cout << "+------------------------------------------------------+-----------+-----------+" << endl;
                                         cout << "| Input: ";
                                         cin >> option;
 
-                                        if (option == "y" || option == "Y" || option.length() == 0)
-                                        {
-                                            // Create Account
-                                            query = R"(INSERT INTO score (student_number, semester, subject_id, score, grade)
-                                            VALUES (?, ?, ?, ?, ?))";
-                                            statement stmt = create_statement(db, query);
-                                            parameter(stmt.get(), 1, nim);
-                                            parameter(stmt.get(), 2, smt);
-                                            parameter(stmt.get(), 3, sub_id);
-                                            parameter(stmt.get(), 4, score);
-                                            parameter(stmt.get(), 5, str_grade);
+                                        
+                                        if(option == "y" || option == "Y" || option.length() == 0) {
 
-                                            // sqlite3_step will return SQLITE_DONE when all the statements are successfully executed 
-                                            if (sqlite3_step(stmt.get()) == SQLITE_DONE) {
+                                            clearScreen();
+                                            menuAddScore:
+                                            cout << endl << endl;
+                                            menuAddScoreErrMsg:
+                                            cout << "+------------------------------------------------------------------------------+"<<endl;
+                                            cout << "|      Please enter the Score!                                                 |" << endl;
+                                            cout << printUI("| Semester         :   ", str_smt);
+                                            cout << printUI("| Student Number   :   ", str_nim);
+                                            cout << printUI("| Student Name     :   ", str_name);
+                                            cout << "| Score            :   ";
+                                            cin >> score;
+                                            str_score = to_string(score);
+
+                                            
+                                            if (score > 100) {
                                                 clearScreen();
-                                                cout << printUIErr("Student's score successfully added");
-                                                goto menuDsn;
+                                                cout << printUIErr("Invalid input. Please enter another value!");
+                                                goto menuAddScoreErrMsg;                                        
+                                            } else if (score > 80) {
+                                                str_grade = "A";
+                                            } else if (score > 60) {
+                                                str_grade = "B";
+                                            } else if (score > 40) {
+                                                str_grade = "C";
+                                            } else if (score > 20) {
+                                                str_grade = "D";
+                                            } else if (score > 0) {
+                                                str_grade = "E";
+                                            } else if (score == 0) {
+                                                str_grade = "-";
                                             } else {
                                                 clearScreen();
-                                                cout << printUIErr("Error, can't add student's score");
-                                                goto menuDsn;
+                                                cout << printUIErr("Invalid input. Please enter another value!");
+                                                goto menuAddScoreErrMsg;
                                             }
-                                        //elif ngisi score
+
+                                            clearScreen();
+                                            scoreConfirm:
+                                            cout << endl << endl;
+                                            scoreConfirmErrMsg:
+                                            cout << "+------------------------------------------------------------------------------+"<<endl;
+                                            cout << "|                                                                              |" << endl;
+                                            cout << printUI("| Semester         :   ", str_smt);
+                                            cout << printUI("| Student Number   :   ", str_nim);
+                                            cout << printUI("| Student Name     :   ", str_name);
+                                            cout << printUI("| Score            :   ", str_score);
+                                            cout << printUI("| Grade            :   ", str_grade);
+                                            cout << "|                                                                              |" << endl;
+                                            cout << "| Do you want to continue with this score and grade? (Y/n)                     |" << endl;
+                                            cout << "|                                                                              |" << endl;
+                                            cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
+                                            cout << "+------------------------------------------------------+-----------+-----------+" << endl;
+                                            cout << "| Input: ";
+                                            cin >> option;
+
+                                            if (option == "y" || option == "Y" || option.length() == 0)
+                                            {
+                                                // Create Account
+                                                query = R"(INSERT INTO score (student_number, semester, subject_id, score, grade)
+                                                VALUES (?, ?, ?, ?, ?))";
+                                                statement stmt = create_statement(db, query);
+                                                parameter(stmt.get(), 1, nim);
+                                                parameter(stmt.get(), 2, smt);
+                                                parameter(stmt.get(), 3, sub_id);
+                                                parameter(stmt.get(), 4, score);
+                                                parameter(stmt.get(), 5, str_grade);
+
+                                                // sqlite3_step will return SQLITE_DONE when all the statements are successfully executed 
+                                                if (sqlite3_step(stmt.get()) == SQLITE_DONE) {
+                                                    clearScreen();
+                                                    cout << printUIErr("Student's score successfully added");
+                                                    goto menuDsn;
+                                                } else {
+                                                    clearScreen();
+                                                    cout << printUIErr("Error, can't add student's score");
+                                                    goto menuDsn;
+                                                }
+                                            //elif ngisi score
+                                            } else if (option == "n" || option == "N") {
+                                                clearScreen();
+                                                goto menuAddScore;
+                                            } else if (option == "9") {
+                                                clearScreen();
+                                                goto menuAddNim;
+                                            } else if (option == "0") {
+                                                clearScreen();
+                                                exit(EXIT_SUCCESS);
+                                            } else {
+                                                clearScreen();
+                                                cout << printUIErr("Invalid option. Please enter the available option!");
+                                                goto scoreConfirmErrMsg;
+                                            }
+
+                                        // elif ngisi nim
                                         } else if (option == "n" || option == "N") {
                                             clearScreen();
-                                            goto menuAddScore;
+                                            goto menuAddNim;
                                         } else if (option == "9") {
                                             clearScreen();
-                                            goto menuAddNim;
+                                            goto menuAddSmt;
                                         } else if (option == "0") {
                                             clearScreen();
                                             exit(EXIT_SUCCESS);
                                         } else {
                                             clearScreen();
                                             cout << printUIErr("Invalid option. Please enter the available option!");
-                                            goto scoreConfirmErrMsg;
+                                            goto nimConfirmErrMsg;
                                         }
+                                    
 
-                                    // elif ngisi nim
-                                    } else if (option == "n" || option == "N") {
-                                        clearScreen();
-                                        goto menuAddNim;
-                                    } else if (option == "9") {
-                                        clearScreen();
-                                        goto menuAddSmt;
-                                    } else if (option == "0") {
-                                        clearScreen();
-                                        exit(EXIT_SUCCESS);
-                                    } else {
-                                        clearScreen();
-                                        cout << printUIErr("Invalid option. Please enter the available option!");
-                                        goto nimConfirmErrMsg;
-                                    }
 
-                                } else{
+                                } 
+                                else{
                                     clearScreen();
                                     cout << printUIErr("Student Number doesn't exist. Please enter a different one!");
                                     goto menuAddNimErrMsg;
@@ -796,8 +812,8 @@ loginInfo showLoginMenu(sqlite3* db) {
                         stmt = create_statement(db, query);
                         parameter(stmt.get(), 1, login_info.number);
 
-                        if (sqlite3_step(stmt.get()) == SQLITE_ROW)
-                        {
+                        if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+
                             int rows = get_int_value(stmt.get(), 0);
 
                             cout << "+------------------------------------------------------------------------------+" << endl;
@@ -847,8 +863,7 @@ loginInfo showLoginMenu(sqlite3* db) {
 
                             str_smt = to_string(smt);
 
-                            if (smt > 0 && smt < 15)
-                            {
+                            if (smt > 0 && smt < 15) {
 
                                 clearScreen();
                                 inputNimEdit:
@@ -1009,6 +1024,19 @@ loginInfo showLoginMenu(sqlite3* db) {
                                             goto updateConfirmErrMsg;
                                         }
 
+                                    } else if (option == "n" || option == "N") {
+                                        clearScreen();
+                                        goto inputNimEdit;
+                                    } else if (option == "9") {
+                                        clearScreen();
+                                        goto inputNimEdit;
+                                    } else if (option == "0") {
+                                        clearScreen();
+                                        exit(EXIT_SUCCESS);
+                                    } else {
+                                        clearScreen();
+                                        cout << printUIErr("Invalid option. Please enter the available option!");
+                                        goto inputNimConfirmErrMsg;
                                     }
 
                                 } else {
@@ -1016,11 +1044,6 @@ loginInfo showLoginMenu(sqlite3* db) {
                                     cout << printUIErr("Student doesn't exist. Please enter a different one!");
                                     goto inputNimEditErrMsg;
                                 }
-                                
-
-
-
-                                system("pause");
 
                             } else {
                                 clearScreen();
@@ -1032,25 +1055,223 @@ loginInfo showLoginMenu(sqlite3* db) {
                             clearScreen();
                             goto menuDsn;
                         }
-
+                        
                     }
                     else if(option=="4"){
+                        string str_smt, str_name, str_nim, str_score, str_grade, str_sub_id, str_n_score, str_n_grade;
+                        int sub_id, smt, score, n_score;
+                        long long nim;
+
                         clearScreen();
-                        cout << "+------------------------------------------------------------------------------+" << endl;
-                        cout << "|                                   DELETE                                     |" << endl;
-                        cout << "|                                                                              |" << endl;
-                        cout << "+------------------------------------------------------+-----------+-----------+" << endl;
-                        cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
-                        cout << "+------------------------------------------------------+-----------+-----------+" << endl;
-                        cout << "| Input: ";
-                        cin >> option;
-                        if (option=="9")
-                        {
+                        chooseClassDel:
+                        cout << endl << endl;
+                        chooseClassDelErrMsg:
+                        query = R"(SELECT count(id) FROM subject_list WHERE lecturer_number = ?)";
+                        stmt = create_statement(db, query);
+                        parameter(stmt.get(), 1, login_info.number);
+
+                        if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+
+                            int rows = get_int_value(stmt.get(), 0);
+
+                            cout << "+------------------------------------------------------------------------------+" << endl;
+                            cout << "|                                   DELETE                                     |" << endl;
+                            cout << "+------------------------------------------------------------------------------+" << endl;
+                            cout << "|                             CHOOSE YOUR CLASS                                |" << endl;
+                            cout << "+------------------------------------------------------------------------------+" << endl;
+                            
+                            sqlite3_stmt *stmt;
+                            string str_log_num = to_string(login_info.number);
+                            string sql = "SELECT id, name FROM subject_list WHERE lecturer_number = " + str_log_num;
+                            int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+                            if (rc != SQLITE_OK) {
+                                cout << "error: " << sqlite3_errmsg(db) << endl;
+                            }
+                            while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+                                cout << "| " << sqlite3_column_int(stmt, 0) << ". " << left << setw(74) << sqlite3_column_text(stmt, 1) <<"|"<< endl;
+                            } 
+
+                            cout << "+------------------------------------------------------+-----------+-----------+" << endl;
+                            cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
+                            cout << "+------------------------------------------------------+-----------+-----------+" << endl;
+                            cout << "| Input: ";
+                            cin >> sub_id;
+
+                            str_sub_id = to_string(sub_id);
+
+                            if (sub_id == 9) {
+                                clearScreen();
+                                goto menuDsn;
+                            } else if (sub_id == 0) {
+                                exit(EXIT_SUCCESS);
+                            } else if(sub_id > rows) {
+                                clearScreen();
+                                cout << printUIErr("Invalid option. Please enter the available option!");
+                                goto chooseClassDelErrMsg;
+                            }
+
+                            // clearScreen();
+                            menuAddSmtDel:
+                            // cout << endl << endl;
+                            inputSmtDelErrMsg:
+                            cout << "+------------------------------------------------------------------------------+" << endl;
+                            cout << "|      Please enter the Semester!                                              |" << endl;
+                            cout << "| Semester         :   ";
+                            cin >> smt;
+
+                            str_smt = to_string(smt);
+
+                            if (smt > 0 && smt < 15) {
+
+                                clearScreen();
+                                inputNimDel:
+                                cout << endl << endl;
+                                inputNimDelErrMsg:
+                                cout << "+------------------------------------------------------------------------------+" << endl;
+                                cout << "|                                   DELETE                                     |" << endl;
+                                cout << "+------------------------------------------------------------------------------+" << endl;
+                                
+                                // sqlite3_stmt *stmt;
+                                string sql = "SELECT score.student_number, person.name, score.score, score.grade FROM score FULL OUTER JOIN person ON score.student_number = person.number WHERE score.subject_id = " + str_sub_id + " AND score.semester = " + str_smt + " ORDER BY score.student_number";
+                                // cout << sql << endl;
+                                int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+
+                                if (rc != SQLITE_OK) {
+                                    cout << "error: " << sqlite3_errmsg(db) << endl;
+                                }
+                                cout << left << setw(9) << "| NIM" << "| " << setw(52) << "NAME" << "| " << setw(6) << "SCORE" << "| " << setw(6) << "GRADE" << "|" << endl;
+
+                                while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+                                    cout << "| " << left << setw(7) << sqlite3_column_int(stmt,0) << "| " << setw(52) << sqlite3_column_text(stmt, 1) << "| " << setw(6) << sqlite3_column_int(stmt, 2) << "| " << setw(6) << sqlite3_column_text(stmt, 3) << "|" << endl;
+                                }    
+                                
+                                cout << "+------------------------------------------------------------------------------+"<<endl;
+                                cout << "|      Please Enter the Student Number!                                        |" << endl;
+                                cout << "| Student Number   :   ";
+                                cin >> nim;
+                                str_nim = to_string(nim);
+
+                                // string query = "SELECT number, name FROM person WHERE status = 'student' AND number = ?";
+                                string query = "SELECT score.student_number, person.name, score.score, score.grade FROM score FULL OUTER JOIN person ON score.student_number = person.number WHERE score.subject_id = ? AND score.semester = ? AND score.student_number = ?";
+                                statement stmt = create_statement(db, query);
+                                parameter(stmt.get(), 1, sub_id);
+                                parameter(stmt.get(), 2, smt);
+                                parameter(stmt.get(), 3, nim);
+
+                                if (sqlite3_step(stmt.get()) == SQLITE_ROW)
+                                {
+                                    str_name = get_text_value(stmt.get(), 1);
+                                    score = get_int_value(stmt.get(), 2);
+                                    str_grade = get_text_value(stmt.get(), 3);
+
+                                    str_score = to_string(score);
+
+                                    clearScreen();
+                                    inputNimDelConfirm:
+                                    cout << endl << endl;
+                                    inputNimDelConfirmErrMsg:
+                                    cout << "+------------------------------------------------------------------------------+" << endl;
+                                    cout << "|                                   EDIT SCORE                                 |" << endl;
+                                    cout << "+------------------------------------------------------------------------------+" << endl; 
+                                    cout << "|                                                                              |" << endl;
+                                    cout << printUI("| Semester         :   ", str_smt);
+                                    cout << printUI("| Student Number   :   ", str_nim);
+                                    cout << printUI("| Student Name     :   ", str_name);
+                                    cout << printUI("| Score            :   ", str_score);
+                                    cout << printUI("| Grade            :   ", str_grade);
+                                    cout << "|                                                                              |" << endl;
+                                    cout << "| Do you want to continue with this student? (Y/n)                             |" << endl;
+                                    cout << "|                                                                              |" << endl;
+                                    cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
+                                    cout << "+------------------------------------------------------+-----------+-----------+" << endl;
+                                    cout << "| Input: ";
+                                    cin >> option;
+
+                                    if(option == "y" || option == "Y" || option.length() == 0) {
+
+                                        clearScreen();
+                                        deleteConfirm:
+                                        cout << endl << endl;
+                                        deleteConfirmErrMsg:
+                                        cout << "+------------------------------------------------------------------------------+"<<endl;
+                                        cout << "|                                                                              |" << endl;
+                                        cout << printUI("| Semester         :   ", str_smt);
+                                        cout << printUI("| Student Number   :   ", str_nim);
+                                        cout << printUI("| Student Name     :   ", str_name);
+                                        cout << printUI("| Score            :   ", str_score);
+                                        cout << printUI("| Grade            :   ", str_grade);
+                                        cout << "|                                                                              |" << endl;
+                                        cout << "| Do you want to delete this student score? (Y/n)                              |" << endl;
+                                        cout << "|                                                                              |" << endl;
+                                        cout << "|                                                      |  9. Back  |  0. Exit  |" << endl;
+                                        cout << "+------------------------------------------------------+-----------+-----------+" << endl;
+                                        cout << "| Input: ";
+                                        cin >> option;
+
+                                        if (option == "y" || option == "Y" || option.length() == 0)
+                                        {
+                                            // Update Score
+                                            query = R"(DELETE FROM score WHERE student_number = ?)";
+                                            statement stmt = create_statement(db, query);
+                                            parameter(stmt.get(), 1, nim);
+
+                                            // sqlite3_step will return SQLITE_DONE when all the statements are successfully executed 
+                                            if (sqlite3_step(stmt.get()) == SQLITE_DONE) {
+                                                clearScreen();
+                                                cout << printUIErr("Student's score successfully deleted");
+                                                goto menuDsn;
+                                            } else {
+                                                clearScreen();
+                                                cout << printUIErr("Error, can't delete student's score");
+                                                goto menuDsn;
+                                            }
+
+                                        //elif ngisi score
+                                        } else if (option == "n" || option == "N") {
+                                            clearScreen();
+                                            goto inputNimDelConfirm;
+                                        } else if (option == "9") {
+                                            clearScreen();
+                                            goto inputNimDelConfirm;
+                                        } else if (option == "0") {
+                                            clearScreen();
+                                            exit(EXIT_SUCCESS);
+                                        } else {
+                                            clearScreen();
+                                            cout << printUIErr("Invalid option. Please enter the available option!");
+                                            goto deleteConfirmErrMsg;
+                                        }
+
+                                    } else if (option == "n" || option == "N") {
+                                        clearScreen();
+                                        goto inputNimDelConfirm;
+                                    } else if (option == "9") {
+                                        clearScreen();
+                                        goto inputNimDelConfirm;
+                                    } else if (option == "0") {
+                                        clearScreen();
+                                        exit(EXIT_SUCCESS);
+                                    } else {
+                                        clearScreen();
+                                        cout << printUIErr("Invalid option. Please enter the available option!");
+                                        goto inputNimDelConfirmErrMsg;
+                                    }
+
+                                } else {
+                                    clearScreen();
+                                    cout << printUIErr("Student doesn't exist. Please enter a different one!");
+                                    goto inputNimDelErrMsg;
+                                }
+
+                            } else {
+                                clearScreen();
+                                cout << printUIErr("Semester doesn't exist. Please enter a different one!");
+                                goto inputSmtDelErrMsg;
+                            }
+
+                        } else {
+                            clearScreen();
                             goto menuDsn;
-                        }
-                        else if (option=="0")
-                        {
-                            exit(EXIT_SUCCESS);
                         }
                     }
                 }
