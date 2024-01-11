@@ -1,7 +1,7 @@
 Algorithm and Programming Class Final Exam
 
 Group Member:
-- 23.61.02.61   - Tandang Pangestu
+- 23.61.0261    - Tandang Pangestu
 - 23.61.0252    - Avidvesha Daivadianta
 - 23.61.0249    - Muhammad Damar Fahrezi
 - 23.61.0246    - M. Fakhry Syafa’at
